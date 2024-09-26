@@ -57,7 +57,8 @@ class SAJModbusHub(DataUpdateCoordinator[dict]):
             ("realtime_data", self.read_modbus_realtime_data),
             ("additional_data", self.read_additional_modbus_data_1),
             ("additional_data_2", self.read_additional_modbus_data_2),
-            ("additional_data_3", self.read_additional_modbus_data_3)
+            ("additional_data_3", self.read_additional_modbus_data_3),
+            ("additional_data_4", self.read_additional_modbus_data_4)
         ]
 
         results = {}
@@ -86,7 +87,8 @@ class SAJModbusHub(DataUpdateCoordinator[dict]):
         self.inverter_data.update(results.get("inverter_data", {}))
 
         return {**self.inverter_data, **results.get("realtime_data", {}), **results.get("additional_data", {}),
-                **results.get("additional_data_2", {}), **results.get("additional_data_3", {})}
+                **results.get("additional_data_2", {}), **results.get("additional_data_3", {}),
+                **results.get("additional_data_4", {})}
 
     async def try_read_registers(self, unit: int, address: int, count: int, max_retries: int = 5, base_delay: float = 0.5, max_delay: float = 30) -> Tuple[Optional[List[int]], bool]:
      for attempt in range(max_retries):
@@ -218,8 +220,31 @@ class SAJModbusHub(DataUpdateCoordinator[dict]):
             return self.last_valid_data.get('additional_modbus_data_3', {})
         self.last_valid_data['additional_modbus_data_3'] = data
         return data
-    
-    
+
+    async def read_additional_modbus_data_4(self) -> dict:
+        data_keys = [
+            "charge_time_enable_control", "discharge_time_enable_control", 
+            "charge_start_time_1", "charge_end_time_1", "charge_power_time_1",
+            "charge_start_time_2", "charge_end_time_2", "charge_power_time_2",
+            "charge_start_time_3", "charge_end_time_3", "charge_power_time_3",
+            "charge_start_time_4", "charge_end_time_4", "charge_power_time_4",
+            "charge_start_time_5", "charge_end_time_5", "charge_power_time_5",
+            "charge_start_time_6", "charge_end_time_6", "charge_power_time_6",
+            "charge_start_time_7", "charge_end_time_7", "charge_power_time_7",
+            "discharge_start_time_1", "discharge_end_time_1", "discharge_power_time_1",
+            "discharge_start_time_2", "discharge_end_time_2", "discharge_power_time_2",
+            "discharge_start_time_3", "discharge_end_time_3", "discharge_power_time_3",
+            "discharge_start_time_4", "discharge_end_time_4", "discharge_power_time_4",
+            "discharge_start_time_5", "discharge_end_time_5", "discharge_power_time_5",
+            "discharge_start_time_6", "discharge_end_time_6", "discharge_power_time_6",
+            "discharge_start_time_7", "discharge_end_time_7", "discharge_power_time_7"
+        ]
+        data, success = await self._read_modbus_data(0x3604, 88, [(key, "decode_16bit_uint",1) for key in data_keys])
+        if not success:
+            return self.last_valid_data.get('additional_modbus_data_4', {})
+        self.last_valid_data['additional_modbus_data_4'] = data
+        return data
+
     async def read_modbus_realtime_data(self) -> dict:
         
 
